@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game UI", "MMO RPG Engine\Game UI.csproj", "{C6B9178B-9ADE-45E2-A2FB-008687F08BEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game Engine Console", "Console Engine\Game Engine Console.csproj", "{B1D7B5BC-D4B8-43D7-B465-C467CBDD2461}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRHubs", "SignalRHubs\SignalRHubs.csproj", "{C0C0AE28-38AF-43A9-BC30-FA4B40FE9D00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game Engine", "Game Engine\Game Engine.csproj", "{92EDF6CE-0906-4A30-B698-A0F31D7C30C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C6B9178B-9ADE-45E2-A2FB-008687F08BEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6B9178B-9ADE-45E2-A2FB-008687F08BEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6B9178B-9ADE-45E2-A2FB-008687F08BEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6B9178B-9ADE-45E2-A2FB-008687F08BEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1D7B5BC-D4B8-43D7-B465-C467CBDD2461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1D7B5BC-D4B8-43D7-B465-C467CBDD2461}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1D7B5BC-D4B8-43D7-B465-C467CBDD2461}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1D7B5BC-D4B8-43D7-B465-C467CBDD2461}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0C0AE28-38AF-43A9-BC30-FA4B40FE9D00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0C0AE28-38AF-43A9-BC30-FA4B40FE9D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0C0AE28-38AF-43A9-BC30-FA4B40FE9D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0C0AE28-38AF-43A9-BC30-FA4B40FE9D00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92EDF6CE-0906-4A30-B698-A0F31D7C30C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92EDF6CE-0906-4A30-B698-A0F31D7C30C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92EDF6CE-0906-4A30-B698-A0F31D7C30C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92EDF6CE-0906-4A30-B698-A0F31D7C30C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,410 @@
+﻿@using MMO_RPG_Engine.Helpers
+@using System.Web.Script.Serialization;
+@using Microsoft.AspNet.Identity;
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Maps</h1>
+    <p class="lead">This should demo the maps of the game.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <h2>Local area</h2>
+        <p>This map should show the player and its surroundings. The player should be able to move around within the map. It should also update in real-time.</p>
+
+        @{ 
+            var localMapStartX = 1;
+            var localMapStartY = 1;
+            var localMapWidth = 10;
+            var localMapHeight = 10;
+        }
+
+        @{
+            var terrainTypes = TerrainTypesHelper.GetTerrainTypes();
+            var jsonSerialiser = new JavaScriptSerializer();
+            
+            <script>
+                var terrainTypes = @Html.Raw(jsonSerialiser.Serialize(terrainTypes));
+                var units = [null, {"TileImageUrl": "/Images/warrior.png"}];
+            </script>
+        }
+
+        <div id="mapcontainer" class="col-md-10" style="padding: 0">
+            <canvas id="mapexample" width="1000" height="1000" style="position: absolute; width: 100%"></canvas>
+            <canvas id="mapexample_units" width="1000" height="1000" style="position: absolute; width: 100%"></canvas>
+            <canvas id="mapexample_animations" width="1000" height="1000" style="position: absolute; width: 100%"></canvas>
+            <canvas id="mapexample_cursors" width="1000" height="1000" style="position: absolute; width: 100%"></canvas>
+        </div>
+
+        <table id="localmap">
+            <thead>
+                <tr>
+                    <th>
+
+                    </th>
+                    @for (var x = localMapStartX; x < localMapStartX + localMapWidth; ++x)
+                    {
+                        <th class="axis x">@x</th>
+                    }           
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            @for (var y = localMapStartY; y < localMapStartY + localMapHeight; ++y)
+            {
+                <tr>
+                    <th class="axis y" value="@y">
+                        @ColumnNameHelper.GetColumnName(y)
+                    </th>
+                    @for (var x = localMapStartX; x < localMapStartX + localMapWidth; ++x)
+                    {
+                        var cellId = "cell" + y + "_" + x;
+                        <td class="tile" id="@cellId">
+                            <div>
+
+                            </div>
+                            <a href="javascript:moveTo(@x, @y)">
+                                <img />
+                            </a>
+                        </td>
+                    }
+                    <th class="axis y" value="@y">
+                        @ColumnNameHelper.GetColumnName(y)
+                    </th>
+                </tr>
+            }
+            <thead>
+                <tr>
+                    <th>
+
+                    </th>
+                    @for (var x = localMapStartX; x < localMapStartX + localMapWidth; ++x)
+                    {
+                        <th class="axis x">@x</th>
+                    }
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+        </table>
+
+        <style>
+
+            #localmap
+            {
+                width: 100%;
+            }
+
+            #localmap .axis.x
+            {
+                text-align: center;
+            }
+
+            #localmap .axis.y
+            {
+                width:1%;
+                white-space:nowrap;
+            }
+
+            #localmap td.tile {
+              position: relative;
+            }
+
+            #localmap td.tile > a,
+            #localmap td.tile > div 
+            {
+              position: absolute;
+              top: 0;
+              left: 0;
+              bottom: 0;
+              right: 0;
+            }
+
+            #localmap td.tile > div {
+                background-size: cover;
+            }
+
+            #localmap td.tile
+            {
+                width:10%;
+            }
+
+            #localmap td.tile > a:hover
+            {
+                border: 5px dotted #b200ff;
+            }
+
+            #localmap td.tile > a:active
+            {
+                border: 5px dotted #ff0000;
+            }
+
+            #localmap td.tile:before {
+              content: "";
+              display: block;
+              padding-top: 75%;
+            }
+
+            #localmap tr:nth-child(even) td.tile:nth-child(odd), 
+            #localmap tr:nth-child(odd) td.tile:nth-child(even)
+            {
+                background-color: #ccc;
+            }
+
+        </style>
+
+        @section  scripts
+        {
+        <!--Script references. -->
+        <!--Reference the SignalR library. -->
+        <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+        <!--Reference the autogenerated SignalR hub script. -->
+        <script src="~/signalr/hubs"></script>
+        <!--Add script to update the page and send messages.-->
+        <script type="text/javascript">
+
+            function moveTo(x, y)
+            {
+                gameHub.server.moveCharacter(x, y);
+            }
+
+            function isInMap(x, y)
+            {
+                return x - @localMapStartX >= 0
+                    && y - @localMapStartY >= 0
+                    && x - @localMapStartX < @localMapWidth
+                    && y - @localMapStartY < @localMapHeight;
+            }
+
+            var mapHeight = $("#mapexample").outerWidth();// * 0.75;
+            $("#mapexample").outerHeight(mapHeight);
+            $("#mapexample_units").outerHeight(mapHeight);
+            $("#mapcontainer").height(mapHeight);
+
+            var terrainclick = function(event)
+            {
+
+            };
+
+            var unitclick = function(event)
+            {
+                var elem =  $("#mapcontainer");
+
+                var x = event.pageX - elem.offset().left;//elem[0].offsetLeft;
+                var y = event.pageY - elem.offset().top;//elem[0].offsetTop;
+                var width = elem.outerWidth();
+                var height = elem.outerHeight();
+
+                var canvasX = x * 1000 / width;
+                var canvasY = y * 1000 / height;
+
+                var mapX = Math.floor(canvasX / 100) + @localMapStartX;
+                var mapY = Math.floor(canvasY / 100) + @localMapStartY;
+
+                moveTo(mapX, mapY);
+            };
+
+            $("#mapexample").click(terrainclick);
+            $("#mapexample_cursors").click(unitclick);
+
+            // init needed for the scope
+            var gameHub;
+
+            // init canvas
+            var mapcanvas = document.getElementById('mapexample');
+            var mapctx = mapcanvas.getContext('2d');
+            var mapcanvas_units = document.getElementById('mapexample_units');
+            var mapctx_units = mapcanvas_units.getContext('2d');
+            var mapcanvas_cursors = document.getElementById('mapexample_cursors');
+            var mapctx_cursors = mapcanvas_cursors.getContext('2d');
+            var mapcanvas_animations = document.getElementById('mapexample_animations');
+            var mapctx_animations = mapcanvas_animations.getContext('2d');
+
+            // create images for the terrain types
+            for(var i = 0; i < terrainTypes.length; ++i)
+            {
+                if(terrainTypes[i] == null) continue;
+                terrainTypes[i].Image = new Image;
+                terrainTypes[i].Image.src = terrainTypes[i].TileImageUrl;
+            }
+
+            // create images for the units
+            for(var i = 0; i < units.length; ++i)
+            {
+                if(units[i] == null) continue;
+                units[i].Image = new Image;
+                units[i].Image.src = units[i].TileImageUrl;
+            }
+
+            $(function () {
+                // Declare a proxy to reference the hub.
+                var game = $.connection.gameHub;
+                gameHub = game;
+
+                var localMapCells = [
+                @for (var y = localMapStartY; y < localMapStartY + localMapHeight; ++y)
+                {
+                    <text>[</text>
+                    for(var x = localMapStartX; x < localMapStartX + localMapWidth; ++x)
+                    {
+                        <text>$('#cell</text>@y<text>_</text>@x<text>'),</text>
+                    }
+                    <text>],</text>
+                }
+                ];
+
+                game.client.hello = function()
+                {
+                    alert('hello');
+                }
+
+                game.client.updateMap = function(map)
+                {
+                    for(var y = @localMapStartY; y < @localMapStartY + @localMapHeight; ++y)
+                    {
+                        for(var x = @localMapStartX; x < @localMapStartX + @localMapWidth; ++x)
+                        {
+                            if(map[y - @localMapStartY][x - @localMapStartX] != null)
+                            {
+                                map[y - @localMapStartY][x - @localMapStartX].forEach(
+                                    function(item, index)
+                                    {
+                                        var terrainTypeId = item.TerrainTypeId;
+                                        if(terrainTypeId == null)
+                                        {
+                                            // old map
+                                            localMapCells[y - @localMapStartY][x - @localMapStartX].find('div').css('background-image','url(/Images/warrior.png)');
+                                            // new map
+                                            mapctx_units.drawImage(units[1].Image, (x - @localMapStartX) * 100, (y - @localMapStartY) * 100,  100, 100);
+                                            if(item.PlayerId == "@User.Identity.GetUserId()")
+                                            {
+                                                mapctx_cursors.rect((x - @localMapStartX) * 100, (y - @localMapStartY) * 100,  100, 100);
+                                                mapctx_cursors.strokeStyle = "#00FF00";
+                                                mapctx_cursors.stroke();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // old map
+                                            localMapCells[y - @localMapStartY][x - @localMapStartX].css('background-image','url('+terrainTypes[terrainTypeId].TileImageUrl+')');
+                                            // new map
+                                            mapctx.drawImage(terrainTypes[terrainTypeId].Image, (x - @localMapStartX) * 100, (y - @localMapStartY) * 100,  100, 100);
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    }
+                }
+
+                game.client.finishMoveCharacter = function(oldX, oldY, newX, newY)
+                {
+                    if(isInMap(oldX, oldY))
+                    {
+                        // old map
+                        var oldCellDiv = localMapCells[oldY - @localMapStartY][oldX - @localMapStartX].find('div');
+                        oldCellDiv.css('background-image','none');
+                        oldCellDiv.css('position','auto');
+                        oldCellDiv.css('top','auto');
+                        oldCellDiv.css('bottom','auto');
+                        oldCellDiv.css('left','auto');
+                        oldCellDiv.css('right','auto');
+
+                        // new map
+                        mapctx_units.clearRect((oldX - @localMapStartX) * 100, (oldY - @localMapStartY) * 100,  100, 100);
+                    }
+                    if(isInMap(newX, newY))
+                    {
+                        // old map
+                        localMapCells[newY - @localMapStartY][newX - @localMapStartX].find('div').css('background-image','url(/Images/warrior.png)');
+
+                        // new map
+                        mapctx_units.drawImage(units[1].Image, (newX - @localMapStartX) * 100, (newY - @localMapStartY) * 100,  100, 100);
+                    }
+                }
+
+                game.client.startMoveCharacter = function(oldX, oldY, newX, newY, finishTime)
+                {
+                    var now = moment();
+                    // TODO fix issues with different server/client time
+                    var finish = moment(finishTime);
+                    var ms = finish.diff(now);
+
+                    var diffX = newX - oldX;
+                    var diffY = newY - oldY;
+
+                    // old map
+                    //, "YYYY-MM-DDTHH:mm:ss.")2017-01-19T00:26:37.3092672+01:00
+                    //moment.utc(moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"))).format("HH:mm:ss");
+                    if(isInMap(oldX, oldY))
+                    {
+                        var oldCellDiv = localMapCells[oldY - @localMapStartY][oldX - @localMapStartX].find('div');
+
+                        var top = diffY + "00%";
+                        var bottom = (0 - diffY) + "00%";
+                        var left = diffX + "00%";
+                        var right = (0 - diffX) + "00%";
+
+                        oldCellDiv.css('position','absolute');
+                        oldCellDiv.animate({ top: top, bottom: bottom, left: left, right: right }, ms);
+                    }
+
+                    // new map
+                    var startClearX = ((diffX < 0 ? oldX - 1 : oldX) - @localMapStartX) * 100;
+                    var startClearY = ((diffY < 0 ? oldY - 1 : oldY) - @localMapStartY) * 100;
+                    var clearX = diffX == 0 ? 100 : 200;
+                    var clearY = diffY == 0 ? 100 : 200;
+                    var animate = function(i, ms, oldX, oldY, newX, newY)
+                    {
+                        setTimeout(function()
+                        {
+                            var offset = 100 * i / ms;
+                            //                            mapctx_units.clearRect((oldX - @localMapStartX) * 100, (oldY - @localMapStartY) * 100,  diffX * 100, diffY * 100);
+                            mapctx_units.clearRect(startClearX, startClearY, clearX, clearY);
+                            mapctx_units.drawImage(units[1].Image, ((oldX - @localMapStartX) * 100) + (diffX * offset), ((oldY - @localMapStartY) * 100) + (diffY * offset),  100, 100);
+                        }, i);
+                    };
+
+                    for(var i = 50; i < ms; i += 50)
+                    {
+                        animate(i, ms, oldX, oldY, newX, newY);
+                    }
+                    animate(ms, ms, oldX, oldY, newX, newY);
+                }
+
+
+                // Create a function that the hub can call to broadcast messages.
+                /*chat.client.broadcastMessage = function (name, message) {
+                    // Html encode display name and message.
+                    var encodedName = $('<div />').text(name).html();
+                    var encodedMsg = $('<div />').text(message).html();
+                    // Add the message to the page.
+                    $('#discussion').append('<li><strong>' + encodedName
+                        + '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
+                };*/
+                // Get the user name and store it to prepend to messages.
+                //$('#displayname').val(prompt('Enter your name:', ''));
+                // Set initial focus to message input box.
+                //$('#message').focus();
+                // Start the connection.
+                $.connection.hub.start().done(function () {
+                    game.server.registerMapClient(@localMapStartX, @localMapStartY, @localMapWidth, @localMapHeight, '@User.Identity.GetUserId()');
+                    //chat.server.send("", "");
+                    /*$('#sendmessage').click(function () {
+                        // Call the Send method on the hub.
+                        chat.server.send($('#displayname').val(), $('#message').val());
+                        // Clear text box and reset focus for next comment.
+                        $('#message').val('').focus();
+                    });*/
+                });
+            });
+        </script>
+        }
+    </div>
+</div>
