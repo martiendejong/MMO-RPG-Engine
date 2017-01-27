@@ -43,6 +43,7 @@ namespace Game_Engine
         public int? QueCharacterId { get; set; }
         public virtual Character QueCharacter { get; set; }
         public virtual Character ExecutingCharacter { get; set; }
+        public int Order { get; set; }
         protected CharacterAction()
         {
 
@@ -54,6 +55,7 @@ namespace Game_Engine
         }
 
         public abstract TimeSpan GetDuration();
+        public abstract bool IsAllowed(IGameContext gameContext);
         public abstract void Start(IGameEngineHubConnector gameEngineHubConnector, IGameContext GameContext, DateTime finishTime);
 
         public abstract void Finish(IGameEngineHubConnector gameEngineHubConnector, IGameContext GameContext, IGameScheduler GameScheduler);
@@ -111,6 +113,7 @@ namespace Game_Engine
         {
             return TimeSpan.FromSeconds(2);
         }
+
         override public void Start(IGameEngineHubConnector gameEngineHubConnector, IGameContext gameContext, DateTime finishTime)
         {
             int oldX = Character.X;
@@ -140,15 +143,27 @@ namespace Game_Engine
             gameContext.SaveChanges();
             gameEngineHubConnector.FinishMoveCharacter(oldX, oldY, Character.X, Character.Y);
 
+
+
             // todo put in base class
-            var nextAction = gameContext.CharacterActions.Where(a => a.QueCharacter.Id == Character.Id).OrderBy(a => a.Id).FirstOrDefault();
-            if(nextAction == null)
+            // STARTS THE NEXT ACTION
+            // find next action, if not allowed find the action after it
+            var nextAction = gameContext.CharacterActions.Where(a => a.QueCharacter.Id == Character.Id).OrderBy(a => a.Order).ThenBy(a => a.Id).FirstOrDefault();
+            while (nextAction != null && !nextAction.IsAllowed(gameContext))
+            {
+                gameContext.CharacterActions.Remove(nextAction);
+                gameContext.SaveChanges();
+                nextAction = gameContext.CharacterActions.Where(a => a.QueCharacter.Id == Character.Id).OrderBy(a => a.Order).ThenBy(a => a.Id).FirstOrDefault();
+            }
+
+            if (nextAction == null)
             {
                 Character.CurrentActionId = null;
             }
             else
             {
                 nextAction.QueCharacterId = null;
+
                 Character.CurrentAction = nextAction;
                 Character.CurrentActionId = nextAction.Id;
                 Character.CurrentActionFinishTime = DateTime.Now.Add(nextAction.GetDuration());
@@ -156,6 +171,21 @@ namespace Game_Engine
             }
             gameContext.CharacterActions.Remove(this);
             gameContext.SaveChanges();
+        }
+
+        public override bool IsAllowed(IGameContext gameContext)
+        {
+            int oldX = Character.X;
+            int oldY = Character.Y;
+
+            MoveCharacter();
+
+            var result = !gameContext.Characters.Any(c => c.X == Character.X && c.Y == Character.Y);
+
+            Character.X = oldX;
+            Character.Y = oldY;
+
+            return result;
         }
     }
     public interface IGameEngineHubConnector

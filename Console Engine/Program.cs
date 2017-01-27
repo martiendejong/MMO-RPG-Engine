@@ -174,11 +174,13 @@ namespace Console_Engine
         public void MoveCharacter(Character character, Direction direction)
         {
             var action = new Move(character, direction);
+            if (!action.IsAllowed(GameContext)) return;
+
             GameContext.Characters.Attach(character);
             GameContext.CharacterActions.Add(action);
             GameContext.SaveChanges();
 
-            if (character.CurrentActionId == null)
+            if (character.CurrentActionId == null || character.CurrentActionFinishTime < DateTime.Now)
             {
                 character.CurrentActionFinishTime = DateTime.Now.Add(action.GetDuration());
                 character.CurrentAction = action;
@@ -191,13 +193,15 @@ namespace Console_Engine
             }
             else
             {
+                GameContext.CharacterActions.RemoveRange(GameContext.CharacterActions.Where(a => a.QueCharacterId == character.Id && a.Id != action.Id));
+                //character.QueuedActions.Clear();
                 action.QueCharacter = character;
+                GameContext.SaveChanges();
                 //character.QueuedActions.Clear();
                 //GameContext.SaveChanges();
                 //character.QueuedActions.Add(action);
             }
             //GameContext.ac
-            GameContext.SaveChanges();
         }
 
         public void Hello()
