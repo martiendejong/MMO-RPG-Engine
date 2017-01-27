@@ -16,7 +16,7 @@ namespace Game_Engine
         public IMapRepository MapRepository { get; }
 
         public ICharacterRepository CharacterRepository { get; }
-
+        
         public Game(IMapRepository mapRepository, ICharacterRepository characterRepository)
         {
             MapRepository = mapRepository;
